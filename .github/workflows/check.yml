@@ -2,10 +2,14 @@ name: Pass/Fail Check
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ master ]
+    paths:
+      - 'verify/**/*'
   pull_request:
-    branches: [ main, master ]
-  workflow_dispatch:
+    branches: [ master ]
+    paths:
+      - 'verify/**/*'
+
 
 jobs:
   check:
@@ -18,28 +22,10 @@ jobs:
     - name: Check for control file
       id: file_check
       run: |
-        if [ -f "PASS" ]; then
-          echo "Control file 'PASS' found - workflow will PASS"
-          echo "result=pass" >> $GITHUB_OUTPUT
-        elif [ -f "FAIL" ]; then
-          echo "Control file 'FAIL' found - workflow will FAIL"
+        if [ -f "verify/FAIL" ]; then
+          echo "❌ Control file 'FAIL' found - workflow will FAIL"
           echo "result=fail" >> $GITHUB_OUTPUT
+          exit 1
         else
-          echo "No control file found (neither 'PASS' nor 'FAIL') - workflow will PASS by default"
-          echo "result=pass" >> $GITHUB_OUTPUT
+          echo "✅ No control file found - workflow will PASS by default"
         fi
-        
-    - name: Pass step
-      if: steps.file_check.outputs.result == 'pass'
-      run: |
-        echo "✅ Workflow is set to PASS"
-        echo "This step runs when:"
-        echo "  - File 'PASS' exists, OR"
-        echo "  - No control files exist (default behavior)"
-        
-    - name: Fail step
-      if: steps.file_check.outputs.result == 'fail'
-      run: |
-        echo "❌ Workflow is set to FAIL"
-        echo "This step runs when file 'FAIL' exists"
-        exit 1

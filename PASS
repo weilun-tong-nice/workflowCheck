@@ -1,3 +1,0 @@
-This file controls the GitHub Actions workflow.
-When this file exists, the workflow will PASS.
-Delete this file and create a 'FAIL' file to make the workflow fail.
