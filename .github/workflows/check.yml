@@ -1,0 +1,45 @@
+name: Pass/Fail Check
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Check for control file
+      id: file_check
+      run: |
+        if [ -f "PASS" ]; then
+          echo "Control file 'PASS' found - workflow will PASS"
+          echo "result=pass" >> $GITHUB_OUTPUT
+        elif [ -f "FAIL" ]; then
+          echo "Control file 'FAIL' found - workflow will FAIL"
+          echo "result=fail" >> $GITHUB_OUTPUT
+        else
+          echo "No control file found (neither 'PASS' nor 'FAIL') - workflow will PASS by default"
+          echo "result=pass" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Pass step
+      if: steps.file_check.outputs.result == 'pass'
+      run: |
+        echo "✅ Workflow is set to PASS"
+        echo "This step runs when:"
+        echo "  - File 'PASS' exists, OR"
+        echo "  - No control files exist (default behavior)"
+        
+    - name: Fail step
+      if: steps.file_check.outputs.result == 'fail'
+      run: |
+        echo "❌ Workflow is set to FAIL"
+        echo "This step runs when file 'FAIL' exists"
+        exit 1
