@@ -1,0 +1,46 @@
+name: Pass/Fail Check
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+
+
+jobs:
+  file-change-detection:
+    runs-on: ubuntu-latest
+    outputs:
+      verify: ${{ steps.changes.outputs.verify }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - uses: dorny/paths-filter@v3
+      id: changes
+      with:
+        filters: |
+          verify:
+            - 'verify/**/*'
+
+  check:
+    runs-on: ubuntu-latest
+    needs: file-change-detection
+    if: needs.file-change-detection.outputs.verify == 'true'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check for control file
+      id: file_check
+      run: |
+        if [ -f "verify/FAIL" ]; then
+          echo "❌ Control file 'FAIL' found - workflow will FAIL"
+          echo "result=fail" >> $GITHUB_OUTPUT
+          exit 1
+        else
+          echo "✅ No control file found - workflow will PASS by default"
+        fi
