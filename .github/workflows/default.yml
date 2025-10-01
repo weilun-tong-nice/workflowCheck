@@ -1,0 +1,14 @@
+name: Default Check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  default:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Pass Regardless
+      run: |
+          echo "✅ Well done! Your first workflow"
